@@ -1,0 +1,26 @@
+{
+
+  "manifest_version": 2,
+  "name": "loading-timer",
+  "version": "0.1",
+
+  "description": "Tracks loading times between webpages.",
+
+  "icons": {
+    "48": "icons/favicon.ico"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/favicon.ico"
+    },
+    "default_title": "Navigation Stats",
+    "default_popup": "popup.html"
+  },
+
+  "permissions": ["webNavigation", "webRequest", "storage", "<all_urls>"],
+  
+  "background": {
+    "scripts": [ "timer.js" ]
+  }
+}
