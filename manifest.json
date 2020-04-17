@@ -18,6 +18,12 @@
     "default_popup": "popup.html"
   },
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "loading-timer.gscanlon21@outlook.com"
+    }
+  },
+
   "permissions": ["webNavigation", "webRequest", "storage", "<all_urls>"],
   
   "background": {
