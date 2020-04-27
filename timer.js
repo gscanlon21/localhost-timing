@@ -3,10 +3,10 @@ var gettingStoredStats = browser.storage.local.get();
 
 gettingStoredStats.then(results => {
     // Initialize the saved stats if not yet initialized.
-    if (!results.stats) {
+    if (!results.host) {
         results = {
             currentRequest: {},
-            host: {},
+            host: {}
         };
     }
 
@@ -23,7 +23,7 @@ gettingStoredStats.then(results => {
         // Persist the updated stats.
         browser.storage.local.set(results);
 
-    }, {urls: ["<all_urls>"]});
+    }, {urls: ["*://localhost/*"]});
 
     browser.webRequest.onCompleted.addListener((evt) => {
         // For a top-level document, documentUrl is undefined
@@ -41,7 +41,7 @@ gettingStoredStats.then(results => {
         browser.storage.local.set(results);
         console.debug(results);
 
-    }, {urls: ["<all_urls>"]});
+    }, {urls: ["*://localhost/*"]});
 
 
 
