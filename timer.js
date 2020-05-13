@@ -16,6 +16,7 @@ gettingStoredStats.then(results => {
 
         results.currentRequests[evt.requestId] = results.currentRequests[evt.requestId] || { };
         results.currentRequests[evt.requestId].startTime = evt.timeStamp;
+        results.currentRequests[evt.requestId].method = evt.method;
 
         // Persist the updated stats.
         browser.storage.local.set(results);
@@ -36,7 +37,6 @@ gettingStoredStats.then(results => {
 
         // Persist the updated stats.
         browser.storage.local.set(results);
-        console.debug(results);
         
     }, {urls: ["*://localhost/*"]});
 });

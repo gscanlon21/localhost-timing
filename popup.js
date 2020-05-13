@@ -1,4 +1,5 @@
 // Get the saved stats and render the data in the popup window.
+const hostElement = document.getElementById("hosts");
 const MAX_ITEMS = 15;
 
 function sorter(array) {
@@ -7,41 +8,46 @@ function sorter(array) {
   });
 }
 
-function addElements(element, array, callback) {
-  while(element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-
-  for (let i=0; i < array.length; i++) {
-    if (i >= MAX_ITEMS) { break; }
-
-    let dt = document.createElement("dt");
-    let dd = document.createElement("dd");
-    dt.textContent = array[i];
-    dd.textContent = callback(array[i]);
-    element.appendChild(dt);
-    element.appendChild(dd);
-  }
+function addItem(header, content) {
+  let dt = document.createElement("dt");
+  let dd = document.createElement("dd");
+  dt.textContent = header;
+  dd.textContent = content;
+  hostElement.appendChild(dt);
+  hostElement.appendChild(dd);
 }
 
 var gettingStoredStats = browser.storage.local.get();
 gettingStoredStats.then(results => {
-  document.getElementById("cleared-date").textContent = new Date(results.clearedDate);
   if (results.hosts === undefined || results.hosts.length === 0) { return; }
+  document.getElementById("cleared-date").textContent = new Date(results.clearedDate);
 
-  let hostElement = document.getElementById("hosts");
+  while (hostElement.firstChild) {
+    hostElement.removeChild(hostElement.firstChild);
+  }
+
+  let stats = calculateStats(Object.values(results.hosts).reduce((acc, val) => acc.concat(val.requests.map(r => r.duration)), []));
+  addItem("Total", stats);
   let sortedHosts = sorter(results.hosts);
-  addElements(hostElement, sortedHosts, (key) => {
+  for (let i=0; i < sortedHosts.length; i++) {
+    let key = sortedHosts[i];
+    if (i >= MAX_ITEMS) { break; }
+
     let host = results.hosts[key];
-    let meaningfulDurations = filterOutliers(host.requests.map(r => r.duration));
-    let rTotal = meaningfulDurations.length;
-    let rSum = sum(meaningfulDurations);
-    let rAvg = Math.round(avg(meaningfulDurations));
-    let rMedian = Math.round(median(meaningfulDurations));
-    let rRange = range(meaningfulDurations);
-    return `total (-outliers): ${rTotal}, duration: ${rSum}ms, avg: ${rAvg}ms, median: ${rMedian}ms, range: ${rRange}`;
-  });
+    let stats = calculateStats(host.requests.map(r => r.duration));
+    addItem(key, stats);
+  }
 });
+
+function calculateStats(numbers) {
+  let significantDurations = filterOutliers(numbers);
+  let rTotal = significantDurations.length;
+  let rSum = sum(significantDurations);
+  let rAvg = Math.round(avg(significantDurations));
+  let rMedian = Math.round(median(significantDurations));
+  let rRange = range(significantDurations);
+  return `(-outliers) total: ${rTotal}, duration: ${rSum}ms, avg: ${rAvg}ms, median: ${rMedian}ms, range: ${rRange}`;
+}
 
 document.getElementById("clear-data").addEventListener('click', function(e) {
   browser.storage.local.clear();
