@@ -26,8 +26,8 @@ gettingStoredStats.then(results => {
         // For a top-level document, documentUrl is undefined
         if (evt.documentUrl !== undefined) { return; }
         
-        const endTime = evt.timeStamp;
-        const url = new URL(evt.url);
+        let endTime = evt.timeStamp;
+        let url = new URL(evt.url);
         let currentRequest = results.currentRequests[evt.requestId];
         currentRequest.duration = endTime - results.currentRequests[evt.requestId].startTime;
         results.hosts[url.href] = results.hosts[url.href] || { requests: [] };
