@@ -3,10 +3,10 @@ var gettingStoredStats = browser.storage.local.get();
 
 gettingStoredStats.then(results => {
     // Initialize the saved stats if not yet initialized.
-    if (!results.host) {
+    if (!results.hosts) {
         results = {
-            currentRequest: {},
-            host: {}
+            currentRequests: { },
+            hosts: { }
         };
     }
 
@@ -14,11 +14,8 @@ gettingStoredStats.then(results => {
         // For a top-level document, documentUrl is undefined
         if (evt.documentUrl !== undefined) { return; }
 
-        console.debug(evt);
-
-        const url = new URL(evt.url);
-        results.currentRequest[evt.requestId] = results.currentRequest[evt.requestId] || {};
-        results.currentRequest[evt.requestId].startTime = evt.timeStamp;
+        results.currentRequests[evt.requestId] = results.currentRequests[evt.requestId] || { };
+        results.currentRequests[evt.requestId].startTime = evt.timeStamp;
 
         // Persist the updated stats.
         browser.storage.local.set(results);
@@ -29,25 +26,17 @@ gettingStoredStats.then(results => {
         // For a top-level document, documentUrl is undefined
         if (evt.documentUrl !== undefined) { return; }
         
-        console.debug(evt);
-
         const endTime = evt.timeStamp;
         const url = new URL(evt.url);
-        results.host[url.href] =  results.host[url.href] || {};
-        results.host[url.href].duration = results.host[url.href].duration || 0
-        results.host[url.href].duration += endTime - results.currentRequest[evt.requestId].startTime;
+        let currentRequest = results.currentRequests[evt.requestId];
+        currentRequest.duration = endTime - results.currentRequests[evt.requestId].startTime;
+        results.hosts[url.href] = results.hosts[url.href] || { requests: [] };
+        results.hosts[url.href].requests.push(currentRequest);
+        delete results.currentRequests[evt.requestId];
 
         // Persist the updated stats.
         browser.storage.local.set(results);
         console.debug(results);
-
+        
     }, {urls: ["*://localhost/*"]});
-
-
-
-    // browser.webNavigation.onCompleted.addListener(evt => {
-    //     if (evt.frameId !== 0) { return; }
-    // }, {
-    //     url: [{schemes: ["http", "https"]}]}
-    // );
 });
